@@ -7,6 +7,7 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.expressions.Window;
 import org.apache.spark.sql.expressions.WindowSpec;
 import org.jetbrains.annotations.NotNull;
+import org.apache.spark.sql.functions.*;
 
 import static minsait.ttaa.datio.common.Common.*;
 import static minsait.ttaa.datio.common.naming.PlayerInput.*;
@@ -24,6 +25,8 @@ public class Transformer extends Writer {
 
         df = cleanData(df);
         df = exampleWindowFunction(df);
+        df= Age_Range_Function(df);
+        /*df=nationality_position(df);*/
         df = columnSelection(df);
 
         // for show 100 records after your transformations and show the Dataset schema
@@ -37,10 +40,19 @@ public class Transformer extends Writer {
     private Dataset<Row> columnSelection(Dataset<Row> df) {
         return df.select(
                 shortName.column(),
-                overall.column(),
+                long_name.column(),
+                age.column(),
+                age_range.column(),
                 heightCm.column(),
+                weight_kg.column(),
+                nationality.column(),
+                /*rank_by_nationality_position.column(),*/
+                club_name.column(),
+                overall.column(),
+                potential.column(),
                 teamPosition.column(),
                 catHeightByPosition.column()
+
         );
     }
 
@@ -95,8 +107,35 @@ public class Transformer extends Writer {
 
         return df;
     }
+   private Dataset<Row> Age_Range_Function(Dataset<Row> df2) {
+
+        /*df2 = df.withColumn(age_range.getName(), when(df.columns(age.column()) < 23,"A")
+                .when(df.columns(age.column()) < 27,"B")
+                .when(df.columns(age.column()) < 32,"C")
+                .when(df.columns(age.column()) >= 32,"D")
+                .otherwise("E"));
+
+        df2.show();*/
+        WindowSpec w = Window.partitionBy(age.column())
+                .orderBy(heightCm.column().desc());
+
+        Column rank = rank().over(w);
+
+        Column rango = when(rank.$less(23), "A")
+                .when(rank.$less(27), "B")
+                .when(rank.$less(32), "C")
+                .otherwise("D");
+
+        df2 = df2.withColumn(age_range.getName(), rango);
 
 
+        return df2;
+    }
+ /* private Dataset<Row> nationality_position (Dataset<Row> df3) {
 
 
+        df3.withColumn(rank_by_nationality_position.getName(),row_number().over(Window.partitionBy(nationality.column()).orderBy(overall .column().desc())));
+        df3.show();
+        return df3;
+    }*/
 }
