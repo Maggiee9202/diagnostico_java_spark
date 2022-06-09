@@ -60,20 +60,20 @@ public class Transformer extends Writer {
      * @return a Dataset readed from csv file
      */
     private Dataset<Row> readInput() {
-        Dataset<Row> df = spark.read()
+        Dataset<Row> df1 = spark.read()
                 .option(HEADER, true)
                 .option(INFER_SCHEMA, true)
                 .csv(INPUT_PATH);
-        return df;
+        return df1;
     }
 
     /**
-     * @param df
+     * @param df2
      * @return a Dataset with filter transformation applied
      * column team_position != null && column short_name != null && column overall != null
      */
-    private Dataset<Row> cleanData(Dataset<Row> df) {
-        df = df.filter(
+    private Dataset<Row> cleanData(Dataset<Row> df2) {
+        df2 = df2.filter(
                 teamPosition.column().isNotNull().and(
                         shortName.column().isNotNull()
                 ).and(
@@ -81,18 +81,18 @@ public class Transformer extends Writer {
                 )
         );
 
-        return df;
+        return df2;
     }
 
     /**
-     * @param df is a Dataset with players information (must have team_position and height_cm columns)
-     * @return add to the Dataset the column "cat_height_by_position"
+     * @param df3 is a Dataset with players information (must have team_position and height_cm columns)
+     * @return add to the Dataset the column  Age_Range_Function
      * by each position value
      * cat A for if is in 20 players tallest
      * cat B for if is in 50 players tallest
      * cat C for the rest
      */
-    private Dataset<Row> exampleWindowFunction(Dataset<Row> df) {
+    private Dataset<Row> exampleWindowFunction(Dataset<Row> df3) {
         WindowSpec w = Window
                 .partitionBy(teamPosition.column())
                 .orderBy(heightCm.column().desc());
@@ -103,11 +103,15 @@ public class Transformer extends Writer {
                 .when(rank.$less(50), "B")
                 .otherwise("C");
 
-        df = df.withColumn(catHeightByPosition.getName(), rule);
+        df3 = df3.withColumn(catHeightByPosition.getName(), rule);
 
-        return df;
+        return df3;
     }
-   private Dataset<Row> Age_Range_Function(Dataset<Row> df2) {
+    /**
+     * @param df4
+     * @return   Age_Range_Function
+     */
+   private Dataset<Row> Age_Range_Function(Dataset<Row> df4) {
 
         /*df2 = df.withColumn(age_range.getName(), when(df.columns(age.column()) < 23,"A")
                 .when(df.columns(age.column()) < 27,"B")
@@ -126,10 +130,10 @@ public class Transformer extends Writer {
                 .when(rank.$less(32), "C")
                 .otherwise("D");
 
-        df2 = df2.withColumn(age_range.getName(), rango);
+        df4 = df4.withColumn(age_range.getName(), rango);
 
 
-        return df2;
+        return df4;
     }
  /* private Dataset<Row> nationality_position (Dataset<Row> df3) {
 
@@ -138,4 +142,4 @@ public class Transformer extends Writer {
         df3.show();
         return df3;
     }*/
-}
+ }

@@ -35,4 +35,4 @@ abstract class Writer {
                 .parquet(OUTPUT_PATH);
     }
 
-}
+    }

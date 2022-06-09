@@ -19,4 +19,4 @@ public final class PlayerInput {
     public static Field teamPosition = new Field("team_position");
     public static Field heightCm = new Field("height_cm");
 
-}
+    }
